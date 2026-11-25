@@ -1,0 +1,223 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Product {
+    int id;
+    string brand;
+    string model;
+    double price;
+    string ram;
+    string storage;
+    Product* next;
+};
+
+struct HashNode {
+    Product* product;
+    HashNode* next;
+};
+
+class LaptopCatalog {
+private:
+    Product* head;
+    HashNode* hashTable[10];
+
+    int hashFunction(int id) {
+        return id % 10;
+    }
+
+public:
+    LaptopCatalog() {
+        head = NULL;
+
+        for (int i = 0; i < 10; i++)
+            hashTable[i] = NULL;
+    }
+
+    // Add new laptop
+    void addLaptop() {
+        Product* p = new Product;
+
+        cout << "Enter Product ID: ";
+        cin >> p->id;
+
+        if (searchLaptop(p->id) != NULL) {
+            cout << "Product ID already exists!\n";
+            delete p;
+            return;
+        }
+
+        cin.ignore();
+
+        cout << "Enter Brand: ";
+        getline(cin, p->brand);
+
+        cout << "Enter Model: ";
+        getline(cin, p->model);
+
+        cout << "Enter Price: ";
+        cin >> p->price;
+
+        cin.ignore();
+
+        cout << "Enter RAM: ";
+        getline(cin, p->ram);
+
+        cout << "Enter Storage: ";
+        getline(cin, p->storage);
+
+        // Insert into Linked List
+        p->next = head;
+        head = p;
+
+        // Insert into Hash Table using Chaining
+        int index = hashFunction(p->id);
+
+        HashNode* h = new HashNode;
+        h->product = p;
+        h->next = hashTable[index];
+        hashTable[index] = h;
+
+        cout << "Laptop added successfully!\n";
+    }
+
+    // Search laptop using Hash Table
+    Product* searchLaptop(int id) {
+        int index = hashFunction(id);
+        HashNode* temp = hashTable[index];
+
+        while (temp != NULL) {
+            if (temp->product->id == id)
+                return temp->product;
+
+            temp = temp->next;
+        }
+
+        return NULL;
+    }
+
+    // Update laptop details
+    void updateLaptop() {
+        int id;
+
+        cout << "Enter Product ID to update: ";
+        cin >> id;
+
+        Product* p = searchLaptop(id);
+
+        if (p == NULL) {
+            cout << "Laptop not found!\n";
+            return;
+        }
+
+        cin.ignore();
+
+        cout << "Enter new Brand: ";
+        getline(cin, p->brand);
+
+        cout << "Enter new Model: ";
+        getline(cin, p->model);
+
+        cout << "Enter new Price: ";
+        cin >> p->price;
+
+        cin.ignore();
+
+        cout << "Enter new RAM: ";
+        getline(cin, p->ram);
+
+        cout << "Enter new Storage: ";
+        getline(cin, p->storage);
+
+        cout << "Laptop updated successfully!\n";
+    }
+
+    // Display all laptops using Linked List
+    void displayLaptops() {
+        Product* temp = head;
+
+        if (temp == NULL) {
+            cout << "No laptops available!\n";
+            return;
+        }
+
+        while (temp != NULL) {
+            cout << "\nProduct ID: " << temp->id;
+            cout << "\nBrand: " << temp->brand;
+            cout << "\nModel: " << temp->model;
+            cout << "\nPrice: Rs. " << temp->price;
+            cout << "\nRAM: " << temp->ram;
+            cout << "\nStorage: " << temp->storage;
+            cout << "\n--------------------------\n";
+
+            temp = temp->next;
+        }
+    }
+
+    // Search and display one laptop
+    void findLaptop() {
+        int id;
+
+        cout << "Enter Product ID to search: ";
+        cin >> id;
+
+        Product* p = searchLaptop(id);
+
+        if (p == NULL) {
+            cout << "Laptop not found!\n";
+        } else {
+            cout << "\nLaptop Found!\n";
+            cout << "Product ID: " << p->id << endl;
+            cout << "Brand: " << p->brand << endl;
+            cout << "Model: " << p->model << endl;
+            cout << "Price: Rs. " << p->price << endl;
+            cout << "RAM: " << p->ram << endl;
+            cout << "Storage: " << p->storage << endl;
+        }
+    }
+};
+
+int main() {
+    LaptopCatalog catalog;
+    int choice;
+
+    do {
+        cout << "\n===== LAPTOP INVENTORY SYSTEM =====\n";
+        cout << "1. Add Laptop\n";
+        cout << "2. Update Laptop Details\n";
+        cout << "3. Display All Laptops\n";
+        cout << "4. Search Laptop\n";
+        cout << "5. Exit\n";
+
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                catalog.addLaptop();
+                break;
+
+            case 2:
+                catalog.updateLaptop();
+                break;
+
+            case 3:
+                catalog.displayLaptops();
+                break;
+
+            case 4:
+                catalog.findLaptop();
+                break;
+
+            case 5:
+                cout << "Exiting program...\n";
+                break;
+
+            default:
+                cout << "Invalid choice!\n";
+        }
+
+    } while (choice != 5);
+
+    return 0;
+}

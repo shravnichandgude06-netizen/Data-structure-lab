@@ -1,0 +1,260 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Course {
+    string courseName;
+    Course* next;
+};
+
+struct Student {
+    int rollNo;
+    string name;
+    Course* courses;
+    Student* next;
+};
+
+class University {
+    static const int SIZE = 10;
+    Student* table[SIZE];
+
+public:
+    University() {
+        for (int i = 0; i < SIZE; i++)
+            table[i] = NULL;
+    }
+
+    int hashFunction(int rollNo) {
+        return rollNo % SIZE;
+    }
+
+    void registerStudent(int rollNo, string name) {
+        int index = hashFunction(rollNo);
+
+        Student* temp = table[index];
+
+        while (temp != NULL) {
+            if (temp->rollNo == rollNo) {
+                cout << "Roll number already exists!\n";
+                return;
+            }
+            temp = temp->next;
+        }
+
+        Student* newStudent = new Student;
+        newStudent->rollNo = rollNo;
+        newStudent->name = name;
+        newStudent->courses = NULL;
+
+        newStudent->next = table[index];
+        table[index] = newStudent;
+
+        cout << "Student registered successfully!\n";
+    }
+
+    void displayStudent(int rollNo) {
+        int index = hashFunction(rollNo);
+        Student* temp = table[index];
+
+        while (temp != NULL) {
+            if (temp->rollNo == rollNo) {
+                cout << "\nRoll Number: " << temp->rollNo;
+                cout << "\nName: " << temp->name;
+                cout << "\nEnrolled Courses: ";
+
+                Course* c = temp->courses;
+
+                if (c == NULL)
+                    cout << "No courses";
+
+                while (c != NULL) {
+                    cout << c->courseName << " ";
+                    c = c->next;
+                }
+
+                cout << endl;
+                return;
+            }
+            temp = temp->next;
+        }
+
+        cout << "Student not found!\n";
+    }
+
+    void updateStudent(int rollNo, string newName) {
+        int index = hashFunction(rollNo);
+        Student* temp = table[index];
+
+        while (temp != NULL) {
+            if (temp->rollNo == rollNo) {
+                temp->name = newName;
+                cout << "Student updated successfully!\n";
+                return;
+            }
+            temp = temp->next;
+        }
+
+        cout << "Student not found!\n";
+    }
+
+    void enrollCourse(int rollNo, string courseName) {
+        int index = hashFunction(rollNo);
+        Student* temp = table[index];
+
+        while (temp != NULL) {
+            if (temp->rollNo == rollNo) {
+                Course* c = new Course;
+                c->courseName = courseName;
+                c->next = temp->courses;
+                temp->courses = c;
+
+                cout << "Course enrolled successfully!\n";
+                return;
+            }
+            temp = temp->next;
+        }
+
+        cout << "Student not found!\n";
+    }
+
+    void withdrawCourse(int rollNo, string courseName) {
+        int index = hashFunction(rollNo);
+        Student* temp = table[index];
+
+        while (temp != NULL) {
+            if (temp->rollNo == rollNo) {
+                Course* c = temp->courses;
+                Course* prev = NULL;
+
+                while (c != NULL) {
+                    if (c->courseName == courseName) {
+                        if (prev == NULL)
+                            temp->courses = c->next;
+                        else
+                            prev->next = c->next;
+
+                        delete c;
+                        cout << "Course withdrawn successfully!\n";
+                        return;
+                    }
+
+                    prev = c;
+                    c = c->next;
+                }
+
+                cout << "Course not found!\n";
+                return;
+            }
+            temp = temp->next;
+        }
+
+        cout << "Student not found!\n";
+    }
+
+    void removeStudent(int rollNo) {
+        int index = hashFunction(rollNo);
+        Student* temp = table[index];
+        Student* prev = NULL;
+
+        while (temp != NULL) {
+            if (temp->rollNo == rollNo) {
+                if (prev == NULL)
+                    table[index] = temp->next;
+                else
+                    prev->next = temp->next;
+
+                Course* c = temp->courses;
+                while (c != NULL) {
+                    Course* nextCourse = c->next;
+                    delete c;
+                    c = nextCourse;
+                }
+
+                delete temp;
+                cout << "Student removed successfully!\n";
+                return;
+            }
+
+            prev = temp;
+            temp = temp->next;
+        }
+
+        cout << "Student not found!\n";
+    }
+};
+
+int main() {
+    University u;
+    int choice, rollNo;
+    string name, course;
+
+    do {
+        cout << "\n--- University Student Management ---";
+        cout << "\n1. Register Student";
+        cout << "\n2. Update Student";
+        cout << "\n3. Display Student";
+        cout << "\n4. Enroll Course";
+        cout << "\n5. Withdraw Course";
+        cout << "\n6. Remove Student";
+        cout << "\n7. Exit";
+
+        cout << "\nEnter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            cout << "Enter Roll Number: ";
+            cin >> rollNo;
+            cout << "Enter Name: ";
+            cin >> name;
+            u.registerStudent(rollNo, name);
+            break;
+
+        case 2:
+            cout << "Enter Roll Number: ";
+            cin >> rollNo;
+            cout << "Enter New Name: ";
+            cin >> name;
+            u.updateStudent(rollNo, name);
+            break;
+
+        case 3:
+            cout << "Enter Roll Number: ";
+            cin >> rollNo;
+            u.displayStudent(rollNo);
+            break;
+
+        case 4:
+            cout << "Enter Roll Number: ";
+            cin >> rollNo;
+            cout << "Enter Course Name: ";
+            cin >> course;
+            u.enrollCourse(rollNo, course);
+            break;
+
+        case 5:
+            cout << "Enter Roll Number: ";
+            cin >> rollNo;
+            cout << "Enter Course Name: ";
+            cin >> course;
+            u.withdrawCourse(rollNo, course);
+            break;
+
+        case 6:
+            cout << "Enter Roll Number: ";
+            cin >> rollNo;
+            u.removeStudent(rollNo);
+            break;
+
+        case 7:
+            cout << "Exiting program...";
+            break;
+
+        default:
+            cout << "Invalid choice!";
+        }
+
+    } while (choice != 7);
+
+    return 0;
+}
